@@ -1,0 +1,39 @@
+{% set IGM_NAME = env['name'] + '-igm' %}
+{% set IT_NAME = env['name'] %}
+
+resources:
+- name: {{ IT_NAME }}
+  type: vm_template_instance.jinja
+  properties:
+    disks: {{ properties['disks'] }}
+    metadata-from-file: {{ properties['metadata-from-file'] }}
+    rootSizeGb: {{ properties['rootSizeGb'] }}
+    os-image: {{ properties['os-image'] }}
+    namePrefix: {{ properties['namePrefix'] }}
+    machineType: {{ properties['machineType'] }}
+    minSize: {{ properties['minSize'] }}
+    maxSize: {{ properties['maxSize'] }}   
+    zone: {{ properties['zone'] }}   
+- name: {{ IGM_NAME }}
+  type: compute.v1.instanceGroupManager
+  properties:
+    baseInstanceName: {{ env['name'] }}-instance
+    instanceTemplate: $(ref.{{ IT_NAME }}.selfLink)
+    targetSize: {{ properties['minSize'] }}
+    zone: {{ properties['zone'] }}
+    {% if properties['targetPool'] %}
+    targetPools:
+    - $(ref.{{ properties['targetPool'] }}.selfLink)
+    {% endif %}
+- name: {{ env['name'] }}-as
+  type: compute.v1.autoscaler
+  properties:
+    autoscalingPolicy:
+      minNumReplicas: {{ properties['minSize'] }}
+      maxNumReplicas: {{ properties['maxSize'] }}
+    target: $(ref.{{ IGM_NAME }}.selfLink)
+    zone: {{ properties['zone'] }}
+
+outputs:
+- name: group
+  value: $(ref.{{ IGM_NAME }}.instanceGroup)

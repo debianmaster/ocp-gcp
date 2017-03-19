@@ -1,0 +1,29 @@
+{% set LB_NAME = env['deployment'] + '-lb' %}
+{% set REGION = properties['zones'][0][:-2] %}
+
+resources:
+{% for zone in properties['zones'] %}
+- name: {{ env['deployment'] }}-service-{{ zone }}
+  type: service.jinja
+  properties:
+    port: {{ properties['port'] }}
+    targetPool: {{ LB_NAME }}-tp
+    zone: {{ zone }}
+    minSize: {{ properties['minSize'] }}
+    maxSize: {{ properties['maxSize'] }}
+    disks: {{ properties['disks'] }}
+    metadata-from-file: {{ properties['metadata-from-file'] }}
+    rootSizeGb: {{ properties['rootSizeGb'] }}
+    os-image: {{ properties['os-image'] }}
+    namePrefix: {{ properties['namePrefix'] }}
+    machineType: {{ properties['machineType'] }}
+    minSize: {{ properties['minSize'] }}
+    maxSize: {{ properties['maxSize'] }}
+    
+{% endfor %}
+
+- name: {{ LB_NAME }}
+  type: lb-l3.jinja
+  properties:
+    region: {{ REGION }}
+    port: {{ properties['port'] }}

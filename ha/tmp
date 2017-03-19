@@ -1,0 +1,7 @@
+      {% for diskObj in properties["disks"] %}
+      - deviceName: {{ diskName(diskObj) }}
+        type: PERSISTENT
+        autoDelete: true
+        source: $(ref.{{ diskName(diskObj) }}.selfLink)
+        sizeGb: {{ diskObj["sizeGb"] }}
+      {% endfor %}
