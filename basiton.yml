@@ -1,0 +1,18 @@
+
+imports:
+- path: vm_template.jinja
+- path: ./metadata/basiton.sh
+  name: basiton.sh
+
+resources:
+- name: openshift-basiton
+  type: vm_template.jinja
+  properties:
+    zone: asia-east1-a
+    count: 1
+    machineType: n1-standard-1
+    namePrefix: openshift-basiton
+    hasExternalIp: true
+    os-image: https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/centos-7-v20170227
+    metadata-from-file:
+      startup-script: basiton.sh
