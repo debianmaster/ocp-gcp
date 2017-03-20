@@ -16,11 +16,12 @@ resources:
       - deviceName: boot
         type: PERSISTENT
         boot: true
-        sizeGb: {{ properties["rootSizeGb"] }}
+        diskSizeGb: {{ properties["rootSizeGb"] }}
         autoDelete: true
         initializeParams:
           diskName: {{ NAME_PREFIX }}-disk
           sourceImage: {{ properties["os-image"] }}
+          diskType: {{ COMPUTE_URL_BASE }}/projects/{{ env["project"] }}/zones/{{ properties["zone"] }}/diskTypes/pd-ssd
       networkInterfaces:
       - network: {{ COMPUTE_URL_BASE }}/projects/{{ env['project'] }}/global/networks/default
         # Access Config required to give the instance a public IP address

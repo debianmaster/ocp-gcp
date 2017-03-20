@@ -1,0 +1,52 @@
+
+imports:
+- path: ./metadata/master.sh
+  name: master.sh
+
+resources:
+- name: ocp-it
+  type: compute.v1.instanceTemplate
+  properties:
+    properties:
+      zone: asia-east1-a
+      machineType: n1-standard-1
+      rootSizeGb: 30
+      networkInterfaces:
+        - network: https://www.googleapis.com/compute/v1/projects/enhanced-mote-157823/global/networks/default
+          accessConfigs:
+          - name: External NAT
+            type: ONE_TO_ONE_NAT
+      disks:
+        - deviceName: boot
+          type: PERSISTENT
+          boot: true
+          sizeGb: 40
+          autoDelete: true
+          initializeParams:
+            sourceImage: https://www.googleapis.com/compute/v1/projects/centos-cloud/global/images/centos-7-v20170227
+
+- name: ocp-hc
+  type: compute.v1.httpHealthCheck
+  properties:
+    port: 443
+    requestPath: /healthz
+- name: ocp-tp
+  type: compute.v1.targetPool
+  properties:
+    region: asia-east1
+    healthChecks: [$(ref.ocp-hc.selfLink)]
+- name: ocp-fr
+  type: compute.v1.forwardingRule
+  properties:
+    region: asia-east1
+    portRange: 443
+    target: $(ref.ocp-tp.selfLink)
+- name: ocp-ig-asia-east1-a
+  type: compute.v1.instanceGroupManager
+  properties:
+    baseInstanceName: master
+    instanceTemplate: $(ref.ocp-it.selfLink)
+    targetSize: 3
+    zone: asia-east1-a
+    targetPools:
+    - $(ref.ocp-tp.selfLink)
